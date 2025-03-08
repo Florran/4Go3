@@ -54,3 +54,17 @@ func parseFlags() Config {
 
 	return config
 }
+
+func mergeHeaders(primaryHeaders, secondaryHeaders map[string][]string) map[string][]string {
+	merged := make(map[string][]string)
+
+	for key, values := range primaryHeaders {
+		merged[key] = append([]string{}, values...)
+	}
+
+	for key, values := range secondaryHeaders {
+		merged[key] = append([]string{}, values...)
+	}
+
+	return merged
+}

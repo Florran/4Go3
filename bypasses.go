@@ -41,7 +41,6 @@ var bypassHeaders = []map[string][]string{
 }
 
 var pathBypassPatterns = []string{
-	"%s/%s", // Default URL
 	"%s/./%s",
 	"%s/../%s",
 	"%s/%%2e/%s",
@@ -53,6 +52,18 @@ var pathBypassPatterns = []string{
 	"%s//%s//",
 	"%s/%s.json",
 	"%s/./%s/..",
+}
+
+var httpMethods = [9]string{
+	"GET",
+	"POST",
+	"PUT",
+	"PATCH",
+	"DELETE",
+	"HEAD",
+	"OPTIONS",
+	"CONNECT",
+	"TRACE",
 }
 
 func generateBypassPaths(url string, path string) []string {

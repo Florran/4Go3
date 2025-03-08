@@ -8,7 +8,10 @@ import (
 )
 
 func worker(client *http.Client, jobs <-chan Job, wg *sync.WaitGroup, rateLimiter <-chan time.Time) {
-	defer wg.Done()
+	defer func() {
+		fmt.Printf("[DEBUG] Worker finished")
+		wg.Done()
+	}()
 
 	for job := range jobs {
 		<-rateLimiter
@@ -48,16 +51,18 @@ func worker(client *http.Client, jobs <-chan Job, wg *sync.WaitGroup, rateLimite
 
 			switch job.BypassType {
 			case "path":
-				fmt.Printf("Response: [%s%d%s], URL: %s\n", statusColor, resp.StatusCode, ColorReset, job.URL)
+				fmt.Printf("URL: %s [%s%d%s]\n", job.URL, statusColor, resp.StatusCode, ColorReset)
 			case "header":
-				fmt.Printf("Response: [%s%d%s], Header: ", statusColor, resp.StatusCode, ColorReset)
+				fmt.Printf("Header: ")
 				for key, values := range job.Headers {
 					fmt.Printf("%s: ", key)
 					for _, value := range values {
 						fmt.Printf("%s", value)
 					}
-					fmt.Printf("\n")
+					fmt.Printf(" [%s%d%s]\n", statusColor, resp.StatusCode, ColorReset)
 				}
+			case "method":
+				fmt.Printf("Method: %s %s [%s%d%s]\n", job.Method, job.URL, statusColor, resp.StatusCode, ColorReset)
 			}
 
 		}()

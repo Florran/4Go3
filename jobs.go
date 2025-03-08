@@ -11,6 +11,7 @@ type Job struct {
 
 func generateJobs(config Config) chan Job {
 	jobs := make(chan Job, 1000)
+	defaultPath := fmt.Sprintf("%s/%s", config.URL, config.Path)
 
 	bypassPaths := generateBypassPaths(config.URL, config.Path)
 	for _, url := range bypassPaths {
@@ -23,13 +24,23 @@ func generateJobs(config Config) chan Job {
 		jobs <- job
 	}
 
-	defaultPath := fmt.Sprintf("%s/%s", config.URL, config.Path)
 	for _, header := range bypassHeaders {
+		mergedHeaders := mergeHeaders(config.Headers, header)
 		job := Job{
 			BypassType: "header",
 			URL:        defaultPath,
 			Method:     "GET",
-			Headers:    header,
+			Headers:    mergedHeaders,
+		}
+		jobs <- job
+	}
+
+	for _, method := range httpMethods {
+		job := Job{
+			BypassType: "method",
+			URL:        defaultPath,
+			Method:     method,
+			Headers:    config.Headers,
 		}
 		jobs <- job
 	}
