@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"time"
 )
 
 type Config struct {
@@ -12,18 +13,24 @@ type Config struct {
 	Threads int
 	Rate    float64
 	Headers map[string][]string
+	Timeout time.Duration
 }
 
 func parseFlags() Config {
 	var config Config
+	var timeout int
 	config.Headers = make(map[string][]string)
 
 	flag.StringVar(&config.URL, "u", "", "Target URL (e.g., https://example.com)")
+
 	flag.StringVar(&config.Path, "path", "", "Path to tamper (e.g., admin-panel)")
+
 	flag.IntVar(&config.Threads, "t", 10, "Number of concurrent threads (workers) default = 10")
+
 	flag.Float64Var(&config.Rate, "rate", 5, "Requests per second default = 5")
 
-	//For each instance of the -H flag add header to slice
+	flag.IntVar(&timeout, "max-time", 10, "Max time per request in seconds (default: 10)")
+
 	flag.Func("H", "Used to set custom headers", func(h string) error {
 
 		parts := strings.SplitN(h, ":", 2)
@@ -51,6 +58,7 @@ func parseFlags() Config {
 
 	config.URL = strings.TrimSuffix(config.URL, "/")
 	config.Path = strings.Replace(config.Path, "/", "", -1)
+	config.Timeout = time.Duration(timeout) * time.Second
 
 	return config
 }

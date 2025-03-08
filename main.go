@@ -10,7 +10,9 @@ func main() {
 
 	jobs := generateJobs(config)
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: config.Timeout,
+	}
 
 	wg := startWorkerPool(client, jobs, config.Threads, config.Rate)
 
