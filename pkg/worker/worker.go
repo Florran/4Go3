@@ -1,13 +1,16 @@
-package main
+package worker
 
 import (
 	"fmt"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/florran/4go3/pkg/jobs"
+	"github.com/florran/4go3/pkg/utils"
 )
 
-func worker(client *http.Client, jobs <-chan Job, wg *sync.WaitGroup, rateLimiter <-chan time.Time) {
+func Worker(client *http.Client, jobs <-chan jobs.Job, wg *sync.WaitGroup, rateLimiter <-chan time.Time) {
 	defer wg.Done()
 
 	for job := range jobs {
@@ -35,46 +38,46 @@ func worker(client *http.Client, jobs <-chan Job, wg *sync.WaitGroup, rateLimite
 		}
 		func() {
 			defer resp.Body.Close()
-			statusColor := ColorYellow
+			statusColor := utils.ColorYellow
 
 			switch resp.StatusCode {
 			case http.StatusOK:
-				statusColor = ColorGreen
+				statusColor = utils.ColorGreen
 			case http.StatusForbidden:
-				statusColor = ColorRed
+				statusColor = utils.ColorRed
 			case http.StatusNotFound:
-				statusColor = ColorYellow
+				statusColor = utils.ColorYellow
 			}
 
 			switch job.BypassType {
 			case "path":
-				fmt.Printf("URL: %s status: [%s%d%s]\n", job.URL, statusColor, resp.StatusCode, ColorReset)
+				fmt.Printf("URL: %s status: [%s%d%s]\n", job.URL, statusColor, resp.StatusCode, utils.ColorReset)
 			case "header":
 				fmt.Printf("Header: ")
 				for key, values := range job.Headers {
-					fmt.Printf("%s%s%s:", ColorCyan, key, ColorReset)
+					fmt.Printf("%s%s%s:", utils.ColorCyan, key, utils.ColorReset)
 					for _, value := range values {
-						fmt.Printf(" %s%s%s", ColorYellow, value, ColorReset)
+						fmt.Printf(" %s%s%s", utils.ColorYellow, value, utils.ColorReset)
 					}
 					fmt.Printf("; ")
 				}
-				fmt.Printf("status: [%s%d%s]\n", statusColor, resp.StatusCode, ColorReset)
+				fmt.Printf("status: [%s%d%s]\n", statusColor, resp.StatusCode, utils.ColorReset)
 			case "method":
-				fmt.Printf("Method: %s %s status: [%s%d%s]\n", job.HttpMethod, job.URL, statusColor, resp.StatusCode, ColorReset)
+				fmt.Printf("Method: %s %s status: [%s%d%s]\n", job.HttpMethod, job.URL, statusColor, resp.StatusCode, utils.ColorReset)
 			}
 
 		}()
 	}
 }
 
-func startWorkerPool(client *http.Client, jobs chan Job, threads int, rate float64) *sync.WaitGroup {
+func StartWorkerPool(client *http.Client, jobs chan jobs.Job, threads int, rate float64) *sync.WaitGroup {
 	var wg sync.WaitGroup
 
 	rateLimiter := time.Tick(time.Second / time.Duration(rate))
 
 	for i := 0; i < threads; i++ {
 		wg.Add(1)
-		go worker(client, jobs, &wg, rateLimiter)
+		go Worker(client, jobs, &wg, rateLimiter)
 	}
 
 	return &wg

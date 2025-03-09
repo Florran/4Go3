@@ -2,19 +2,23 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/florran/4go3/pkg/config"
+	"github.com/florran/4go3/pkg/jobs"
+	"github.com/florran/4go3/pkg/worker"
 )
 
 func main() {
 
-	config := parseFlags()
+	userConfig := config.ParseFlags()
 
-	jobs := generateJobs(config)
+	jobs := jobs.GenerateJobs(userConfig)
 
 	client := &http.Client{
-		Timeout: config.Timeout,
+		Timeout: userConfig.Timeout,
 	}
 
-	wg := startWorkerPool(client, jobs, config.Threads, config.Rate)
+	wg := worker.StartWorkerPool(client, jobs, userConfig.Threads, userConfig.Rate)
 
 	wg.Wait()
 }

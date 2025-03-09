@@ -1,4 +1,4 @@
-package main
+package jobs
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ type Job struct {
 	Headers    map[string][]string //Headers to include in the request
 }
 
-func generateJobs(config Config) chan Job {
+func GenerateJobs(config Config) chan Job {
 	jobs := make(chan Job, 1000)
 	defaultPath := fmt.Sprintf("%s/%s", config.URL, config.Path)
 	bypassPaths := generateBypassPaths(config.URL, config.Path)
