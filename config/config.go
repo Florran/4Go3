@@ -25,11 +25,11 @@ func parseFlags() Config {
 
 	flag.StringVar(&config.Path, "path", "", "Path to tamper (e.g., admin-panel)")
 
-	flag.IntVar(&config.Threads, "t", 10, "Number of concurrent threads (workers) default = 10")
+	flag.IntVar(&config.Threads, "t", 10, "Number of concurrent threads (workers)")
 
-	flag.Float64Var(&config.Rate, "rate", 5, "Requests per second default = 5")
+	flag.Float64Var(&config.Rate, "rate", 5, "Requests per second default ")
 
-	flag.IntVar(&timeout, "max-time", 10, "Max time per request in seconds (default: 10)")
+	flag.IntVar(&timeout, "max-time", 10, "Max time per request in seconds")
 
 	flag.Func("H", "Used to set custom headers", func(h string) error {
 

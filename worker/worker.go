@@ -13,7 +13,7 @@ func worker(client *http.Client, jobs <-chan Job, wg *sync.WaitGroup, rateLimite
 	for job := range jobs {
 		<-rateLimiter
 
-		req, err := http.NewRequest(job.Method, job.URL, nil)
+		req, err := http.NewRequest(job.HttpMethod, job.URL, nil)
 		if err != nil {
 			fmt.Printf("Error creating request: %v\n", err)
 			continue
@@ -60,7 +60,7 @@ func worker(client *http.Client, jobs <-chan Job, wg *sync.WaitGroup, rateLimite
 				}
 				fmt.Printf("status: [%s%d%s]\n", statusColor, resp.StatusCode, ColorReset)
 			case "method":
-				fmt.Printf("Method: %s %s status: [%s%d%s]\n", job.Method, job.URL, statusColor, resp.StatusCode, ColorReset)
+				fmt.Printf("Method: %s %s status: [%s%d%s]\n", job.HttpMethod, job.URL, statusColor, resp.StatusCode, ColorReset)
 			}
 
 		}()
