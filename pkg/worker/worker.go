@@ -2,6 +2,7 @@ package worker
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -33,8 +34,13 @@ func Worker(client *http.Client, jobs <-chan jobs.Job, wg *sync.WaitGroup, rateL
 
 		resp, err := client.Do(req)
 		if err != nil {
-			fmt.Printf("Response error: %v\n", err)
-			continue
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				fmt.Printf("Bypass: %s%s%s status: [%sTIMEDOUT%s]\n", utils.ColorCyan, job.Bypass, utils.ColorReset, utils.ColorRed, utils.ColorReset)
+				continue
+			} else {
+				fmt.Printf("Response error: %v\n", err)
+				continue
+			}
 		}
 		func() {
 			defer resp.Body.Close()
@@ -49,22 +55,7 @@ func Worker(client *http.Client, jobs <-chan jobs.Job, wg *sync.WaitGroup, rateL
 				statusColor = utils.ColorYellow
 			}
 
-			switch job.BypassType {
-			case "path":
-				fmt.Printf("URL: %s status: [%s%d%s]\n", job.URL, statusColor, resp.StatusCode, utils.ColorReset)
-			case "header":
-				fmt.Printf("Header: ")
-				for key, values := range job.Headers {
-					fmt.Printf("%s%s%s:", utils.ColorCyan, key, utils.ColorReset)
-					for _, value := range values {
-						fmt.Printf(" %s%s%s", utils.ColorYellow, value, utils.ColorReset)
-					}
-					fmt.Printf("; ")
-				}
-				fmt.Printf("status: [%s%d%s]\n", statusColor, resp.StatusCode, utils.ColorReset)
-			case "method":
-				fmt.Printf("Method: %s %s status: [%s%d%s]\n", job.HttpMethod, job.URL, statusColor, resp.StatusCode, utils.ColorReset)
-			}
+			fmt.Printf("Bypass: %s%s%s status: [%s%d%s]\n", utils.ColorCyan, job.Bypass, utils.ColorReset, statusColor, resp.StatusCode, utils.ColorReset)
 
 		}()
 	}
