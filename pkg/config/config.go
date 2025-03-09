@@ -17,17 +17,17 @@ type Config struct {
 }
 
 func ParseFlags() Config {
-	var config Config
+	var userConfig Config
 	var timeout int
-	config.Headers = make(map[string][]string)
+	userConfig.Headers = make(map[string][]string)
 
-	flag.StringVar(&config.URL, "u", "", "Target URL (e.g., https://example.com)")
+	flag.StringVar(&userConfig.URL, "u", "", "Target URL (e.g., https://example.com)")
 
-	flag.StringVar(&config.Path, "path", "", "Path to tamper (e.g., admin-panel)")
+	flag.StringVar(&userConfig.Path, "path", "", "Path to tamper (e.g., admin-panel)")
 
-	flag.IntVar(&config.Threads, "t", 10, "Number of concurrent threads (workers)")
+	flag.IntVar(&userConfig.Threads, "t", 10, "Number of concurrent threads (workers)")
 
-	flag.Float64Var(&config.Rate, "rate", 5, "Requests per second default ")
+	flag.Float64Var(&userConfig.Rate, "rate", 5, "Requests per second default ")
 
 	flag.IntVar(&timeout, "max-time", 10, "Max time per request in seconds")
 
@@ -40,27 +40,27 @@ func ParseFlags() Config {
 
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
-		config.Headers[key] = append(config.Headers[key], value)
+		userConfig.Headers[key] = append(userConfig.Headers[key], value)
 
 		return nil
 	})
 
 	flag.Parse()
 
-	if config.URL == "" || config.Path == "" {
+	if userConfig.URL == "" || userConfig.Path == "" {
 		fmt.Println("Usage: -u <URL> -path <path> [-t threads] [-rate requests per second]")
 		return Config{}
 	}
 
-	if !strings.HasPrefix(config.URL, "http") {
-		config.URL = "https://" + config.URL
+	if !strings.HasPrefix(userConfig.URL, "http") {
+		userConfig.URL = "https://" + userConfig.URL
 	}
 
-	config.URL = strings.TrimSuffix(config.URL, "/")
-	config.Path = strings.Replace(config.Path, "/", "", -1)
-	config.Timeout = time.Duration(timeout) * time.Second
+	userConfig.URL = strings.TrimSuffix(userConfig.URL, "/")
+	userConfig.Path = strings.Replace(userConfig.Path, "/", "", -1)
+	userConfig.Timeout = time.Duration(timeout) * time.Second
 
-	return config
+	return userConfig
 }
 
 func MergeHeaders(primaryHeaders, secondaryHeaders map[string][]string) map[string][]string {

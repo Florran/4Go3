@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/florran/4go3/pkg/bypass"
-	"github.com/florran/4go3/pkg/config"
+	"github.com/florran/4go3/bypass"
+	"github.com/florran/4go3/config"
 )
 
 type Job struct {
