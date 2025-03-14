@@ -16,10 +16,23 @@ type Config struct {
 	Timeout time.Duration
 }
 
+func flagsHelp() {
+	fmt.Println("\n-u Target URL (e.g. https://example.com or http://example.com), if no protocol is defined (e.g. example.com) https:// is used")
+	fmt.Println("\n-path Last URL segment to tamper (e.g. admin for https://example.com/panel/admin)")
+	fmt.Println("\n-t Number of concurrent threads (default: 10)")
+	fmt.Println("\n-rate Number of recuests per second (default: 5)")
+	fmt.Println("\n-max-time Max time per request in seconds")
+	fmt.Println("\n-H Headers to include in requests (e.g. \"Referer: https://example.com\") use multiple flags for multiple headers")
+	fmt.Println("")
+}
+
 func ParseFlags() Config {
 	var userConfig Config
 	var timeout int
+
 	userConfig.Headers = make(map[string][]string)
+
+	flag.Usage = flagsHelp
 
 	flag.StringVar(&userConfig.URL, "u", "", "Target URL (e.g., https://example.com)")
 
@@ -56,6 +69,15 @@ func ParseFlags() Config {
 		userConfig.URL = "https://" + userConfig.URL
 	}
 
+	if userConfig.Rate < 1 {
+		fmt.Println("Rate must be greater than 1 defaulting to 1 (slowest)")
+		userConfig.Rate = 1
+	}
+
+	if userConfig.Threads < 1 {
+		fmt.Println("Threads must be greater than 1 defaulting to 1 (leasts work)")
+		userConfig.Threads = 1
+	}
 	userConfig.URL = strings.TrimSuffix(userConfig.URL, "/")
 	userConfig.Path = strings.Replace(userConfig.Path, "/", "", -1)
 	userConfig.Timeout = time.Duration(timeout) * time.Second
