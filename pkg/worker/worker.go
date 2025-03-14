@@ -35,7 +35,7 @@ func Worker(client *http.Client, jobs <-chan jobs.Job, wg *sync.WaitGroup, rateL
 		resp, err := client.Do(req)
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				fmt.Printf("Bypass: %s%s%s status: [%sTIMEDOUT%s]\n", utils.ColorCyan, job.Bypass, utils.ColorReset, utils.ColorRed, utils.ColorReset)
+				fmt.Printf("[%sTIMEDOUT%s] Bypass: %s%s%s\n", utils.ColorRed, utils.ColorReset, utils.ColorCyan, job.Bypass, utils.ColorReset)
 			} else {
 				fmt.Printf("Response error: %v\n", err)
 			}
@@ -58,7 +58,7 @@ func Worker(client *http.Client, jobs <-chan jobs.Job, wg *sync.WaitGroup, rateL
 
 			}
 
-			fmt.Printf("Bypass: %s%s%s status: [%s%d%s]\n", utils.ColorCyan, job.Bypass, utils.ColorReset, statusColor, resp.StatusCode, utils.ColorReset)
+			fmt.Printf("[%s%d%s] Bypass: %s%s%s\n", statusColor, resp.StatusCode, utils.ColorReset, utils.ColorCyan, job.Bypass, utils.ColorReset)
 
 		}()
 	}
