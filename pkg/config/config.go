@@ -60,8 +60,8 @@ func ParseFlags() Config {
 
 	flag.Parse()
 
-	if userConfig.URL == "" || userConfig.Path == "" {
-		fmt.Println("Usage: -u <URL> -path <path> [-t threads] [-rate requests per second]")
+	if userConfig.URL == "" {
+		fmt.Println("Usage: -u <URL> [-path path] [-t threads] [-rate requests per second]")
 		return Config{}
 	}
 
@@ -79,7 +79,7 @@ func ParseFlags() Config {
 		userConfig.Threads = 1
 	}
 	userConfig.URL = strings.TrimSuffix(userConfig.URL, "/")
-	userConfig.Path = strings.Replace(userConfig.Path, "/", "", -1)
+	userConfig.Path = strings.TrimPrefix(userConfig.Path, "/")
 	userConfig.Timeout = time.Duration(timeout) * time.Second
 
 	return userConfig

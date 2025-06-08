@@ -19,18 +19,21 @@ type Job struct {
 func GenerateJobs(userConfig config.Config) chan Job {
 	jobs := make(chan Job, 1000)
 	defaultPath := fmt.Sprintf("%s/%s", userConfig.URL, userConfig.Path)
-	bypassPaths := bypass.GenerateBypassPaths(userConfig.URL, userConfig.Path)
+	if userConfig.Path != "" {
+		bypassPaths := bypass.GenerateBypassPaths(userConfig.URL, userConfig.Path)
 
-	//Genrates header bypass jobs
-	for _, url := range bypassPaths {
-		job := Job{
-			BypassType: "path",
-			Bypass:     url,
-			URL:        url,
-			HttpMethod: "GET",
-			Headers:    userConfig.Headers,
+		//Genrates path bypass jobs
+		for _, url := range bypassPaths {
+			job := Job{
+				BypassType: "path",
+				Bypass:     url,
+				URL:        url,
+				HttpMethod: "GET",
+				Headers:    userConfig.Headers,
+			}
+			jobs <- job
 		}
-		jobs <- job
+
 	}
 
 	//Genrates header bypass jobs
