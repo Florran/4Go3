@@ -7,8 +7,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/florran/4go3/pkg/jobs"
-	"github.com/florran/4go3/pkg/utils"
+	"github.com/florran/4go3/internal/jobs"
+)
+
+const (
+	ColorReset  = "\033[0m"
+	ColorRed    = "\033[31m"
+	ColorGreen  = "\033[32m"
+	ColorYellow = "\033[33m"
+	ColorBlue   = "\033[34m"
+	ColorCyan   = "\033[36m"
 )
 
 func Worker(client *http.Client, jobs <-chan jobs.Job, wg *sync.WaitGroup, rateLimiter <-chan time.Time) {
@@ -35,7 +43,7 @@ func Worker(client *http.Client, jobs <-chan jobs.Job, wg *sync.WaitGroup, rateL
 		resp, err := client.Do(req)
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				fmt.Printf("[%sTIMEDOUT%s] Bypass: %s%s%s\n", utils.ColorRed, utils.ColorReset, utils.ColorCyan, job.Bypass, utils.ColorReset)
+				fmt.Printf("[%sTIMEDOUT%s] Bypass: %s%s%s\n", ColorRed, ColorReset, ColorCyan, job.Bypass, ColorReset)
 			} else {
 				fmt.Printf("Response error: %v\n", err)
 			}
@@ -44,21 +52,21 @@ func Worker(client *http.Client, jobs <-chan jobs.Job, wg *sync.WaitGroup, rateL
 
 		func() {
 			defer resp.Body.Close()
-			statusColor := utils.ColorYellow
+			statusColor := ColorYellow
 
 			switch resp.StatusCode {
 			case http.StatusOK:
-				statusColor = utils.ColorGreen
+				statusColor = ColorGreen
 
 			case http.StatusForbidden:
-				statusColor = utils.ColorRed
+				statusColor = ColorRed
 
 			case http.StatusNotFound:
-				statusColor = utils.ColorYellow
+				statusColor = ColorYellow
 
 			}
 
-			fmt.Printf("[%s%d%s] Bypass: %s%s%s\n", statusColor, resp.StatusCode, utils.ColorReset, utils.ColorCyan, job.Bypass, utils.ColorReset)
+			fmt.Printf("[%s%d%s] Bypass: %s%s%s\n", statusColor, resp.StatusCode, ColorReset, ColorCyan, job.Bypass, ColorReset)
 
 		}()
 	}

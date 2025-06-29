@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/florran/4go3/pkg/config"
-	"github.com/florran/4go3/pkg/jobs"
-	"github.com/florran/4go3/pkg/worker"
+	"github.com/florran/4go3/internal/config"
+	"github.com/florran/4go3/internal/jobs"
+	"github.com/florran/4go3/internal/worker"
 )
 
 func main() {

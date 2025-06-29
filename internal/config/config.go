@@ -8,17 +8,19 @@ import (
 )
 
 type Config struct {
-	URL     string
-	Path    string
-	Threads int
-	Rate    float64
-	Headers map[string][]string
-	Timeout time.Duration
+	URL         string
+	Path        string
+	QueryParams string
+	Threads     int
+	Rate        float64
+	Headers     map[string][]string
+	Timeout     time.Duration
 }
 
 func flagsHelp() {
 	fmt.Println("\n-u Target URL (e.g. https://example.com or http://example.com), if no protocol is defined (e.g. example.com) https:// is used")
 	fmt.Println("\n-path Last URL segment to tamper (e.g. admin for https://example.com/panel/admin)")
+	fmt.Println("\n-q Query parameters (e.g., key1=value1) use multiple flags for multiple parameters")
 	fmt.Println("\n-t Number of concurrent threads (default: 10)")
 	fmt.Println("\n-rate Number of recuests per second (default: 5)")
 	fmt.Println("\n-max-time Max time per request in seconds")
@@ -44,8 +46,28 @@ func ParseFlags() Config {
 
 	flag.IntVar(&timeout, "max-time", 10, "Max time per request in seconds")
 
-	flag.Func("H", "Used to set custom headers", func(h string) error {
+	flag.Func("q", "-q Query parameters (e.g., key1=value1) use multiple flags for multiple parameters", func(q string) error {
+		parts := strings.SplitN(q, "=", 2)
+		if len(parts) != 2 {
+			return fmt.Errorf("invalid query parameter format: %s", q)
+		}
 
+		key := strings.TrimSpace(parts[0])
+		value := strings.TrimSpace(parts[1])
+
+		if key == "" || value == "" {
+			return fmt.Errorf("invalid query parameter: %s", q)
+		}
+
+		if userConfig.QueryParams != "" {
+			userConfig.QueryParams += "&"
+		}
+		userConfig.QueryParams += fmt.Sprintf("%s=%s", key, value)
+
+		return nil
+	})
+
+	flag.Func("H", "Used to set custom headers", func(h string) error {
 		parts := strings.SplitN(h, ":", 2)
 		if len(parts) != 2 {
 			return fmt.Errorf("invalid header format: %s", h)
