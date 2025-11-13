@@ -11,8 +11,8 @@ go run ./cmd/4go3 -url https://example.org/test1/test2/test3?user=3 -segment tes
 Key flags:
 
 * `-url`/`-u` – Target URL. Schemes default to `https://` when omitted.
-* `-segment`/`-path` – Named path segment to fuzz. When omitted, the last segment is used.
-* `-segment-index` – Zero-based index of the segment to fuzz. Useful for duplicate segment names.
+* `-segment`/`-path` – Named path segment to fuzz.
+* `-segment-index` – Zero-based index of the segment to fuzz. Useful for duplicate segment names. When neither `-segment` nor `-segment-index` is supplied, the CLI lists the available path segments and lets you pick interactively.
 * `-query`/`-q` – Additional query parameters in `key=value` form.
 * `-threads`/`-t`, `-rate`, `-timeout` – Worker pool configuration.
 * `-header`/`-H` – Repeatable custom headers.

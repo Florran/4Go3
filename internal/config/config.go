@@ -1,12 +1,15 @@
 package config
 
 import (
+	"bufio"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -168,7 +171,11 @@ func ParseFlags() (Config, error) {
 		}
 		cfg.TargetSegmentIndex = idx
 	case len(cfg.PathSegments) > 0:
-		cfg.TargetSegmentIndex = len(cfg.PathSegments) - 1
+		idx, err := promptForSegmentIndex(cfg.PathSegments)
+		if err != nil {
+			return Config{}, err
+		}
+		cfg.TargetSegmentIndex = idx
 	}
 
 	if cfg.Rate < 1 {
@@ -184,6 +191,55 @@ func ParseFlags() (Config, error) {
 	cfg.Timeout = time.Duration(timeout) * time.Second
 
 	return cfg, nil
+}
+
+func promptForSegmentIndex(segments []string) (int, error) {
+	if len(segments) == 0 {
+		return -1, errors.New("no path segments available for selection")
+	}
+
+	fmt.Fprintln(os.Stdout, "Available path segments to fuzz:")
+	for idx, segment := range segments {
+		fmt.Fprintf(os.Stdout, "  [%d] %s\n", idx, segment)
+	}
+
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Fprintf(os.Stdout, "Select segment index [0-%d]: ", len(segments)-1)
+		input, err := reader.ReadString('\n')
+		if err != nil && !errors.Is(err, io.EOF) {
+			return -1, err
+		}
+
+		input = strings.TrimSpace(input)
+		if input == "" {
+			if errors.Is(err, io.EOF) {
+				return -1, errors.New("no segment index selected")
+			}
+			fmt.Fprintln(os.Stdout, "Please enter a value.")
+			continue
+		}
+
+		selected, convErr := strconv.Atoi(input)
+		if convErr != nil {
+			if errors.Is(err, io.EOF) {
+				return -1, convErr
+			}
+			fmt.Fprintf(os.Stdout, "Invalid index %q. Please enter a number between 0 and %d.\n", input, len(segments)-1)
+			continue
+		}
+
+		if selected < 0 || selected >= len(segments) {
+			rangeErr := fmt.Errorf("segment-index %d out of range", selected)
+			if errors.Is(err, io.EOF) {
+				return -1, rangeErr
+			}
+			fmt.Fprintf(os.Stdout, "%s. Please enter a number between 0 and %d.\n", rangeErr.Error(), len(segments)-1)
+			continue
+		}
+
+		return selected, nil
+	}
 }
 
 func (c Config) TargetSegment() string {
