@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/florran/4go3/internal/config"
 	"github.com/florran/4go3/internal/jobs"
@@ -10,7 +12,11 @@ import (
 
 func main() {
 
-	userConfig := config.ParseFlags()
+	userConfig, err := config.ParseFlags()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	jobs := jobs.GenerateJobs(userConfig)
 
